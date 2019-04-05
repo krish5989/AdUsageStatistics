@@ -31,11 +31,11 @@ The solution should be coded in **Scala**.
 #### **SOLUTION APPROACH:**
 The scala spark project ***AdUsageStatistics*** provides solution to the above requirement in the following way:
 
-1. Parse the input log files using *spark.read.option("header","false").option("delimiter","\t").option("comment","#").schema(inputSchema).textFile(input_file_path)*.
+1. Parse the input log files using *spark.read.option("header","false").option("delimiter","\t").option("comment","#").schema(inputSchema).csv(input_path)*.
 2. Filter out invalid GUIDs using the *filter* method.
 3. Store the output to a *tempView*
 4. Using *sparkSQL* get the frequency and Total users count.
-5. Write the output to a single file.
+5. Write the output to a tab delimited file.
 
 #### **TECH STACK USED:**
 This scala spark project uses below software versions:
