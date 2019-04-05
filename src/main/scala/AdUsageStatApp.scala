@@ -3,17 +3,18 @@ package com.apache.spark.AdUsageStatistics
 /**
  * @author KRISHNAN
  * @Version 1.0
- * @Description This app gets the frequency of ads viewed by users from the input log files.
  */
 
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.SQLImplicits
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructType, StructField, DataTypes}
 import org.apache.log4j.{Level, Logger}
 import scala.util.{Try, Success, Failure}
 import java.io.FileNotFoundException
+import java.io.IOException
 
 
 object AdUsageStatApp {
@@ -21,8 +22,8 @@ object AdUsageStatApp {
   def main(args: Array[String]) {
     
     //check the number of input args:
-    if (args.length < 2) {
-      System.err.println("Usage: spark2-submit AdUsageStatApp <input_file> <output_file> <master>")
+    if (args.length < 3) {
+      System.err.println("Usage: spark2-submit AdUsageStatApp <input_path> <output_path> <master>")
       System.exit(1)
     }
     
@@ -33,12 +34,12 @@ object AdUsageStatApp {
     val spark = SparkSession
                .builder()
                .appName("AdUsageStatApp")
-               .master(args(1))
+               .master(args(2))
                .getOrCreate()
     //assigning input path to variables:
     val inputpath = args(0)
-    
-    
+    val outputpath = args(1)
+        
     // starting the data processing steps:
     log.info("starting the AdUsageStatApp data processing")
     
@@ -98,36 +99,36 @@ object AdUsageStatApp {
           val filterDF = inputDF.select("ad_id","site_id","site_url","guid")
                                 .filter(col("guid") !== "unsupported")      //using filter to eliminate unsupported guids
                                 .filter(col("guid") !== "-")                //using filter to eliminate '-' guids
-                                .filter(col("guid").rlike("^[a-z0-9-]*$"))  //using rlike to filter special character guids
+                                .filter(col("guid").rlike("\\W"))           //using rlike to filter special character guids
                                 .filter(col("guid") !== "")                 //using filter to remove null guids
+                                .toDF("ad_id","site_id","site_url","guid")  //converting the dataset to dataframe.
                                 
           log.info("getting the frequency information from input data")
           
           filterDF.createOrReplaceTempView("ad_usage_data")           //creating view for querying data
-          val outputDF = spark.sql("""select ad_id,
-                                             site_id,
-                                             frequency,
-                                             count(*) as total_users
+          val outputDF = spark.sql("""select ad_id
+                                            ,site_id
+                                            ,sum(frequency) as frequency
+                                            ,count(guid) as total_users
                                     from (
-                                    select ad_id, site_id, guid, count(*) as frequency 
-                                    from ad_usage_data
-                                    group by ad_id, site_id, guid
-                                    ) where frequency > 5
+                                          select ad_id
+                                                ,site_id
+                                                ,guid
+                                                ,count(site_url) as frequency 
+                                          from ad_usage_data
+                                          group by ad_id, site_id, guid
+                                    ) where frequency > 5 
                                     group by ad_id, site_id, frequency
                                     order by frequency desc""").toDF("ad_id","site_id","frequency","total_users")
           
-          log.info("writing output data to table")
+          log.info("writing output data to a file")
           
-          val writeOutput = outputDF.coalesce(2).write.mode("Append").option("delimiter", "\t").saveAsTable("psol_sandbox.ad_usage_output")
-          spark.catalog.refreshTable("psol_sandbox.ad_usage_output")
-          
-          log.info("completed loading the output to table")
-          
-          
+          val writeOutput = outputDF.coalesce(1).write.mode("Append").option("delimiter", "\t").option("header", "true").csv(outputpath)
+                   
+          log.info("completed loading the output to file")
+                    
           //clearing all cache before exiting:
-          outputDF.unpersist()
-          filterDF.unpersist()
-          inputDF.unpersist()
+          spark.catalog.clearCache()
           
           log.info("exiting the spark job")
           
@@ -135,12 +136,20 @@ object AdUsageStatApp {
           
     } catch {
       case ex: FileNotFoundException => {
-        log.error(s"input file $inputpath does not exist : $ex")
+        log.error(s"path does not exist : $ex")
+        println(s"File path not found: $ex")
         System.exit(1)
-      } 
-    
+      }
+      
+      case ex1: IOException => {
+        log.error(s"Failed due to : $ex1")
+        println(s"Failed due to : $ex1")
+        System.exit(1)
+      }
+      
       case unknown: Exception => {
         log.error(s"Unknown exception: $unknown")
+        System.err.println(s"Unknown exception: $unknown")
         System.exit(1)
       }
     }
