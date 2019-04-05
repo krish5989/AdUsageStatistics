@@ -42,3 +42,4 @@ This scala spark project uses below software versions:
 
 1. Scala 2.11
 2. Spark 2.3
+3. Java 1.8
