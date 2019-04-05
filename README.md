@@ -36,3 +36,9 @@ The scala spark project ***AdUsageStatistics*** provides solution to the above r
 3. Store the output to a *tempView*
 4. Using *sparkSQL* get the frequency and Total users count.
 5. Write the output to a single file.
+
+#### ** TECH STACK USED:**
+This scala spark project uses below software versions:
+
+1. Scala 2.11
+2. Spark 2.3
