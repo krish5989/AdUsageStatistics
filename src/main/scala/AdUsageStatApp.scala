@@ -111,10 +111,9 @@ object AdUsageStatApp {
                                     from (
                                     select ad_id, site_id, guid, count(*) as frequency 
                                     from ad_usage_data
-                                    where site_url is not null
-                                    and site_url != "-"
                                     group by ad_id, site_id, guid
-                                    ) group by ad_id, site_id, frequency
+                                    ) where frequency > 5
+                                    group by ad_id, site_id, frequency
                                     order by frequency desc""").toDF("ad_id","site_id","frequency","total_users")
           
           log.info("writing output data to table")
