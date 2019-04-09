@@ -106,10 +106,10 @@ object AdUsageStatApp {
           log.info("getting the frequency information from input data")
           
           filterDF.createOrReplaceTempView("ad_usage_data")           //creating view for querying data
-          val outputDF = spark.sql("""select ad_id
-                                            ,site_id
-                                            ,sum(frequency) as frequency
-                                            ,count(guid) as total_users
+          val outputDF = spark.sql("""select a.ad_id
+                                            ,a.site_id
+                                            ,sum(a.frequency) as frequency
+                                            ,count(a.guid) as total_users
                                     from (
                                           select ad_id
                                                 ,site_id
@@ -117,8 +117,8 @@ object AdUsageStatApp {
                                                 ,count(site_url) as frequency 
                                           from ad_usage_data
                                           group by ad_id, site_id, guid
-                                    ) where frequency > 5 
-                                    group by ad_id, site_id, frequency
+                                    ) a where a.frequency > 5 
+                                    group by a.ad_id, a.site_id
                                     order by frequency desc""").toDF("ad_id","site_id","frequency","total_users")
           
           log.info("writing output data to a file")
@@ -137,19 +137,16 @@ object AdUsageStatApp {
     } catch {
       case ex: FileNotFoundException => {
         log.error(s"path does not exist : $ex")
-        println(s"File path not found: $ex")
         System.exit(1)
       }
       
       case ex1: IOException => {
         log.error(s"Failed due to : $ex1")
-        println(s"Failed due to : $ex1")
         System.exit(1)
       }
       
       case unknown: Exception => {
         log.error(s"Unknown exception: $unknown")
-        System.err.println(s"Unknown exception: $unknown")
         System.exit(1)
       }
     }
