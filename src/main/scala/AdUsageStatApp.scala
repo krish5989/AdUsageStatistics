@@ -124,9 +124,6 @@ object AdUsageStatApp {
                    
           log.info("completed loading the output to file")
                     
-          //clearing all cache before exiting:
-          spark.catalog.clearCache()
-          
           log.info("exiting the spark job")
           
           System.exit(0)
