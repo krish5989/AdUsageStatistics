@@ -91,16 +91,13 @@ object AdUsageStatApp {
     log.info("reading the input file")
     
     try {
-          val inputDF = spark.read.option("header","false")
+          val inputDF = spark.read.option("header","false")                //reading the input files into dataframe
                         .option("delimiter","\t")
                         .option("comment","#")
                         .schema(inputSchema)
                         .csv(inputpath)
           val filterDF = inputDF.select("ad_id","site_id","site_url","guid")
-                                .filter(col("guid") !== "unsupported")      //using filter to eliminate unsupported guids
-                                .filter(col("guid") !== "-")                //using filter to eliminate '-' guids
-                                .filter(col("guid").rlike("\\W"))           //using rlike to filter special character guids
-                                .filter(col("guid") !== "")                 //using filter to remove null guids
+                                .filter(col("guid").rlike("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"))  //using rlike to filter all non-standard guids
                                 .toDF("ad_id","site_id","site_url","guid")  //converting the dataset to dataframe.
                                 
           log.info("getting the frequency information from input data")
@@ -108,7 +105,7 @@ object AdUsageStatApp {
           filterDF.createOrReplaceTempView("ad_usage_data")           //creating view for querying data
           val outputDF = spark.sql("""select a.ad_id
                                             ,a.site_id
-                                            ,sum(a.frequency) as frequency
+                                            ,a.frequency
                                             ,count(a.guid) as total_users
                                     from (
                                           select ad_id
@@ -118,12 +115,12 @@ object AdUsageStatApp {
                                           from ad_usage_data
                                           group by ad_id, site_id, guid
                                     ) a where a.frequency > 5 
-                                    group by a.ad_id, a.site_id
-                                    order by frequency desc""").toDF("ad_id","site_id","frequency","total_users")
+                                    group by a.ad_id, a.site_id, a.frequency
+                                    order by a.frequency desc""").toDF("ad_id","site_id","frequency","total_users") //using spark sql to get the frequency and user counts
           
           log.info("writing output data to a file")
           
-          val writeOutput = outputDF.coalesce(1).write.mode("Append").option("delimiter", "\t").option("header", "true").csv(outputpath)
+          val writeOutput = outputDF.coalesce(1).write.mode("Append").option("delimiter", "\t").option("header", "true").csv(outputpath) //writing the output to a tab delimited csv file.
                    
           log.info("completed loading the output to file")
                     
