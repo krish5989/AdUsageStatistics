@@ -32,7 +32,7 @@ The solution should be coded in **Scala**.
 The scala spark project ***AdUsageStatistics*** provides solution to the above requirement in the following way:
 
 1. Parse the input log files using *spark.read.option("header","false").option("delimiter","\t").option("comment","#").schema(inputSchema).csv(input_path)*.
-2. Filter out invalid GUIDs using the *filter* method.
+2. Filter out invalid GUIDs [*GUIDs that dont comply with UUID standards*] using the *filter* method.
 3. Store the output to a *tempView*
 4. Using *sparkSQL* get the frequency and Total users count.
 5. Write the output to a tab delimited file.
@@ -40,11 +40,14 @@ The scala spark project ***AdUsageStatistics*** provides solution to the above r
 #### **USAGE:**
 Below command is used to trigger this job in spark 2.x:
 
- > *spark2-submit --class <class-name> jar-file <input_file_path> <output_file_path> master*
+```
+spark2-submit --class <class-name> jar-file <input_file_path> <output_file_path> master
+```
  
  
- **example:** spark2-submit --class com.apache.spark.AdUsageStatistics.AdUsageStatApp AdUsageStatistics-0.0.1-SNAPSHOT.jar "/user/psol/psol_sandbox/sample_test/input" "/user/psol/psol_sandbox/sample_test/output" "local[*]"
-
+ ```
+ example: spark2-submit --class com.apache.spark.AdUsageStatistics.AdUsageStatApp AdUsageStatistics-0.0.1-SNAPSHOT.jar "/user/psol/psol_sandbox/sample_test/input" "/user/psol/psol_sandbox/sample_test/output" "local[*]"
+ ```
 
 #### **TECH STACK USED:**
 This scala spark project uses below software versions:
