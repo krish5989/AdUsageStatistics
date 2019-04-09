@@ -7,7 +7,7 @@ The purpose of this project is to determine the high frequency ads viewed more t
 
   Data science suspects that advertising campaigns are showing the same ad to users too many times (a high frequency) as they browse their favorite websites.  They’ve asked the data engineers to investigate. Given two input files *(**ad_data.1.log and ad_data.2.log**)* containing tab delimited ad event data, find all of the users that saw the same ad more than 5x on a site.
 
-#### **ASSUMPTIONS TO BE TAKEN INTO CONSIDERATION:**
+#### **POINTS TO BE TAKEN INTO CONSIDERATION:**
 -	Each line in the input files represents one user’s view of an ad on a site.
 -	GUID is a unique identifier for a user
 -	Filter out any ad events that do not have a valid GUID (i.e. GUID is “unsupported”, “-”, etc).  To be valid, the GUID should be in a standard UUID format. **Example:** *310183a5-2a76-4742-a2f7-52c5faa605d5*.
