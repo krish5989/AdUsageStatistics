@@ -37,6 +37,13 @@ The scala spark project ***AdUsageStatistics*** provides solution to the above r
 4. Using *sparkSQL* get the frequency and Total users count.
 5. Write the output to a tab delimited file.
 
+#### **USAGE:**
+Below command is used to trigger the job in spark 2.x:
+
+*spark2-submit --class com.apache.spark.AdUsageStatistics.AdUsageStatApp \
+AdUsageStatistics-0.0.1-SNAPSHOT.jar "/user/psol/psol_sandbox/sample_test/input" "/user/psol/psol_sandbox/sample_test/output" "local[*]"*
+
+
 #### **TECH STACK USED:**
 This scala spark project uses below software versions:
 
