@@ -40,8 +40,7 @@ The scala spark project ***AdUsageStatistics*** provides solution to the above r
 #### **USAGE:**
 Below command is used to trigger the job in spark 2.x:
 
-*spark2-submit --class com.apache.spark.AdUsageStatistics.AdUsageStatApp \
-AdUsageStatistics-0.0.1-SNAPSHOT.jar "/user/psol/psol_sandbox/sample_test/input" "/user/psol/psol_sandbox/sample_test/output" "local[*]"*
+ > spark2-submit --class com.apache.spark.AdUsageStatistics.AdUsageStatApp AdUsageStatistics-0.0.1-SNAPSHOT.jar "/user/psol/psol_sandbox/sample_test/input" "/user/psol/psol_sandbox/sample_test/output" "local[*]"
 
 
 #### **TECH STACK USED:**
