@@ -36,7 +36,7 @@ object AdUsageStatApp {
                .appName("AdUsageStatApp")
                .master(args(2))
                .getOrCreate()
-    //assigning input path to variables:
+    //assigning input & output path to variables:
     val inputpath = args(0)
     val outputpath = args(1)
         
